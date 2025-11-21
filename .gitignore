@@ -1,0 +1,17 @@
+# Build directories
+bin/
+dist/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Coverage
+coverage.out
+
+# Editor swap files
+*.swp
+*.swo
+
+# macOS
+.DS_Store
