@@ -4,7 +4,7 @@ Copyright © 2025 Wael Mahrous
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -15,7 +15,7 @@ var openCmd = &cobra.Command{
 	Short: "Open a wormhole in the current directory",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("open called")
+		log.Println("Opening wormhole...")
 	},
 }
 

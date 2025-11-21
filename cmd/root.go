@@ -22,6 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"io"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -34,9 +36,12 @@ var rootCmd = &cobra.Command{
 	Use:   "wormhole",
 	Short: "Easily transport files between shells.",
 	Long:  `Easily transport files between shells.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if verbose == false {
+			log.SetOutput(io.Discard)
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -49,10 +54,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(
-		&verbose,
-		"verbose", "v",
-		false,
-		"Enable verbose output",
-	)
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 }
