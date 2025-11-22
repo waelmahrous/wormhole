@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var copyMode bool
+
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
 	Use:   "send [files...]",
@@ -18,16 +20,34 @@ var sendCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1), // require at least one file
 
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("sending", len(args), "file(s)")
-
 		target, _ := os.ReadFile(FilePath)
 
-		for _, fileName := range args {
-			os.Rename(fileName, filepath.Join(string(target), fileName))
+		log.Println("sending", len(args), "file(s) to ", string(target))
+
+		if copyMode == true {
+			for _, fileName := range args {
+				input, err := os.ReadFile(fileName)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+
+				err = os.WriteFile(filepath.Join(string(target), fileName), input, 0644)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+			}
+		} else {
+			for _, fileName := range args {
+				os.Rename(fileName, filepath.Join(string(target), fileName))
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(sendCmd)
+
+	sendCmd.Flags().BoolVarP(&copyMode, "copy", "c", false, "Copy mode")
 }
