@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -15,7 +16,20 @@ var openCmd = &cobra.Command{
 	Short: "Open a wormhole in the current directory",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("Opening wormhole...")
+		target, err := os.Getwd()
+
+		if err != nil {
+			log.Println("Could not open wormhole in target directory")
+			os.Exit(1)
+		}
+
+		err = os.WriteFile(FilePath, []byte(target), 0x644)
+		if err != nil {
+			log.Println("Could not set target directory")
+			os.Exit(1)
+		}
+
+		log.Println("Wormhole open at ", target)
 	},
 }
 

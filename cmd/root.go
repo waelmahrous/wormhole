@@ -25,11 +25,14 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
 
 var verbose bool
+var Destination string
+var FilePath string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,6 +43,27 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if verbose == false {
 			log.SetOutput(io.Discard)
+		}
+
+		FilePath = filepath.Join(Destination, ".wormhole.state")
+	},
+
+	Run: func(cmd *cobra.Command, args []string) {
+		_, err := os.Stat(FilePath)
+		if err == nil {
+			log.Println("State file already exists at ", FilePath)
+		} else if os.IsNotExist(err) {
+			_, err := os.Create(FilePath)
+
+			if err != nil {
+				log.Println("Could not create state file")
+				os.Exit(1)
+			}
+
+			log.Println("Created state file at ", Destination)
+		} else {
+			log.Println("Error: ", err)
+			os.Exit(1)
 		}
 	},
 }
@@ -54,5 +78,13 @@ func Execute() {
 }
 
 func init() {
+	var userHome, err = os.UserHomeDir()
+
+	if err != nil {
+		log.Println("Could not establish user home directory")
+		os.Exit(1)
+	}
+
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+	rootCmd.PersistentFlags().StringVarP(&Destination, "destination", "d", userHome, "Set custom state file directory")
 }
