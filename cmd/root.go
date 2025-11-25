@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -31,6 +32,7 @@ import (
 )
 
 var silent bool
+var status bool
 var Destination string
 var FilePath string
 
@@ -48,10 +50,19 @@ var rootCmd = &cobra.Command{
 		FilePath = filepath.Join(Destination, ".wormhole.state")
 	},
 
+	//TODO: Find a nicer way to do this
 	Run: func(cmd *cobra.Command, args []string) {
 		_, err := os.Stat(FilePath)
 		if err == nil {
-			log.Println("State file already exists at ", FilePath)
+			if status {
+				file, err := os.ReadFile(FilePath)
+				if err != nil {
+					log.Println("Error: ", err)
+					os.Exit(1)
+				}
+
+				fmt.Println(string(file))
+			}
 		} else if os.IsNotExist(err) {
 			_, err := os.Create(FilePath)
 
@@ -84,6 +95,8 @@ func init() {
 		log.Println("Could not establish user home directory")
 		os.Exit(1)
 	}
+
+	rootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")
 
 	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
 	rootCmd.PersistentFlags().StringVarP(&Destination, "destination", "d", userHome, "Set custom state file directory")
