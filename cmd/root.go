@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var verbose bool
+var silent bool
 var Destination string
 var FilePath string
 
@@ -41,7 +41,7 @@ var rootCmd = &cobra.Command{
 	Long:  `Easily transport files between shells.`,
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if verbose == false {
+		if silent == true {
 			log.SetOutput(io.Discard)
 		}
 
@@ -85,6 +85,6 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
 	rootCmd.PersistentFlags().StringVarP(&Destination, "destination", "d", userHome, "Set custom state file directory")
 }
