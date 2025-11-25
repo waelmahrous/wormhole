@@ -29,7 +29,7 @@ var openCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		log.Println("Wormhole open at ", target)
+		log.Println("Wormhole open at", target)
 	},
 }
 
