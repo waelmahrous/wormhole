@@ -17,7 +17,7 @@
 
 ## Installation
 
-Run `make build` to build the application.
+Run `make install` to build the application and add autocompletion.
 
 ## Example Workflow
 
