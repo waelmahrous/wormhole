@@ -2,7 +2,7 @@
 
 ### Teleport files between terminals without thinking about paths.
 
-**wormhole** is a tiny shell utility that lets you “open” a destination in one terminal, then instantly send, copy, pull, or jump to it from anywhere else. No more typing long paths, no more hunting for the right directory. If you already have a terminal open where you want things to go, that location becomes your wormhole.
+**wormhole** is a tiny shell utility that lets you “open” a destination in one terminal, then instantly send or copy to it from anywhere else. No more typing long paths, no more hunting for the right directory. If you already have a terminal open where you want things to go, that location becomes your wormhole.
 
 ---
 
@@ -11,13 +11,34 @@
 - **Open a wormhole** in the current directory
 - **Send** files or directories into the wormhole
 - **Copy** files without deleting the originals
-- **Pull** everything from the wormhole back to your current location
-- **Jump** into the wormhole destination (spawns a new shell session there)
-- **Check status** or **close** the wormhole
+- **Check status** 
 
 ## Installation
 
-Run `make install` to build the application and add autocompletion.
+
+### Option 1: Install via go install
+
+```Bash
+go install github.com/waelmahrous/wormhole/cmd/wormhole@latest
+```
+
+Make sure your Go bin directory is in your PATH:
+
+```Bash
+export PATH="$HOME/go/bin:$PATH"
+```
+
+Add that line to your shell config (~/.zshrc, ~/.bashrc, etc.) to make it permanent.
+
+### Option 2: Build from source
+
+Clone the repository and run:
+
+```Bash
+make install
+```
+
+This builds the application and installs shell autocompletion.
 
 ## Example Workflow
 
