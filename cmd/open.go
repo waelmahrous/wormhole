@@ -10,22 +10,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var destination string
+
 // openCmd represents the open command
 var openCmd = &cobra.Command{
 	Use:   "open",
 	Short: "Open a wormhole in the current directory",
-
 	Run: func(cmd *cobra.Command, args []string) {
-		target, err := os.Getwd()
+		var target string
+		var err error
+
+		if destination != "" {
+			target = destination
+			_, err = os.ReadDir(target)
+		} else {
+			target, err = os.Getwd()
+		}
 
 		if err != nil {
-			log.Println("Could not open wormhole in target directory")
+			log.Printf("Could not open wormhole in target directory %q: %v\n", target, err)
 			os.Exit(1)
 		}
 
-		err = os.WriteFile(FilePath, []byte(target), 0x644)
-		if err != nil {
-			log.Println("Could not set target directory")
+		if err = os.WriteFile(FilePath, []byte(target), 0o644); err != nil {
+			log.Printf("Could not set target directory %q: %v\n", target, err)
 			os.Exit(1)
 		}
 
@@ -35,4 +43,12 @@ var openCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(openCmd)
+
+	openCmd.Flags().StringVarP(
+		&destination,
+		"destination",
+		"d",
+		"",
+		"Open wormhole in custom destination",
+	)
 }
