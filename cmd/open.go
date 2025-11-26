@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/waelmahrous/wormhole/internal"
 )
 
 var destination string
@@ -32,8 +33,8 @@ var openCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if err = os.WriteFile(FilePath, []byte(target), 0o644); err != nil {
-			log.Printf("Could not set target directory %q: %v\n", target, err)
+		if err = internal.UpdateDestination("", target); err != nil {
+			log.Printf("Could not save wormhole state for %q: %v\n", target, err)
 			os.Exit(1)
 		}
 

@@ -4,12 +4,14 @@ Copyright © 2025 Wael Mahrous
 package cmd
 
 import (
-	"github.com/otiai10/copy"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
+
+	"github.com/waelmahrous/wormhole/internal"
 )
 
 var copyMode bool
@@ -21,16 +23,27 @@ var sendCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1), // require at least one file
 
 	Run: func(cmd *cobra.Command, args []string) {
-		target, _ := os.ReadFile(FilePath)
-		log.Println("sending", len(args), "file(s) to ", string(target))
+		target, err := internal.GetDestination(FilePath)
+		if err != nil {
+			log.Printf("No open wormhole: %v\n", err)
+			os.Exit(1)
+		}
 
-		if copyMode == true {
-			for _, fileName := range args {
-				copy.Copy(fileName, filepath.Join(string(target), fileName))
-			}
-		} else {
-			for _, fileName := range args {
-				os.Rename(fileName, filepath.Join(string(target), fileName))
+		log.Println("sending", len(args), "file(s) to", target)
+
+		for _, fileName := range args {
+			dst := filepath.Join(target, fileName)
+
+			if copyMode {
+				if err := copy.Copy(fileName, dst); err != nil {
+					log.Printf("Failed to copy %q to %q: %v\n", fileName, dst, err)
+					os.Exit(1)
+				}
+			} else {
+				if err := os.Rename(fileName, dst); err != nil {
+					log.Printf("Failed to move %q to %q: %v\n", fileName, dst, err)
+					os.Exit(1)
+				}
 			}
 		}
 	},
@@ -39,5 +52,5 @@ var sendCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(sendCmd)
 
-	sendCmd.Flags().BoolVarP(&copyMode, "copy", "c", false, "Copy mode")
+	sendCmd.Flags().BoolVarP(&copyMode, "copy", "c", false, "Copy mode (do not move files)")
 }
