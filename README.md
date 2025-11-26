@@ -8,6 +8,15 @@ Might turn this into a tmux plugin, there is minimal support for that atm.
 
 ---
 
+- [Features](#features)
+- [Installation](#installation)
+  - [Go](#option-1-install-via-go-install)
+  - [Build from source](#option-2-build-from-source)
+  - [tmux integration](#tmux-integration)
+- [Example Workflow](#example-workflow)
+  - [shell](#shell-a-navigate-where-you-want-files-to-land)
+  - [tmux usage](#tmux-usage)
+
 ## Features
 
 - **Open a wormhole** in the current directory
