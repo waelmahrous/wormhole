@@ -4,6 +4,8 @@
 
 **wormhole** is a tiny shell utility that lets you “open” a destination in one terminal, then instantly send or copy to it from anywhere else. No more typing long paths, no more hunting for the right directory. If you already have a terminal open where you want things to go, that location becomes your wormhole.
 
+Might turn this into a tmux plugin, there is minimal support for that atm.
+
 ---
 
 ## Features
@@ -12,6 +14,7 @@
 - **Send** files or directories into the wormhole
 - **Copy** files without deleting the originals
 - **Check status** 
+- ***(very)* minimal tmux integration**
 
 ## Installation
 
@@ -39,6 +42,14 @@ make install
 ```
 
 This builds the application and installs shell autocompletion.
+
+### tmux integration
+There is minimal tmux integration available. Sourcing the tmux file does the trick, but
+this could eventually turn into a fully fledged tmux plugin.
+
+```Bash
+./wormhole.tmux
+```
 
 ## Example Workflow
 
