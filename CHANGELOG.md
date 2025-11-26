@@ -1,3 +1,15 @@
+## v0.3.0 (2025-11-26)
+
+### Feat
+
+- **tmux**: add binding to open wormhole in current pane
+- **tmux**: minimal integration
+- **open**: add custom destination flag
+
+### Refactor
+
+- change state file to json format
+
 ## v0.2.0 (2025-11-25)
 
 ### Feat
