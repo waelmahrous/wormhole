@@ -64,3 +64,13 @@ wormhole open
 wormhole send file1.txt assets/*.png
 ```
 
+### tmux usage
+```Bash
+# Opens a tree selector. Pick a pane and a wormhole will open using that pane’s working directory.
+Prefix-W
+```
+
+```Bash
+# Instantly opens a wormhole at the current pane’s working directory (no picker).
+Ctrl-w
+```
