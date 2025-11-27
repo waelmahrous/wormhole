@@ -29,13 +29,11 @@ var openCmd = &cobra.Command{
 		}
 
 		if err != nil {
-			log.Printf("Could not open wormhole in target directory %q: %v\n", target, err)
-			os.Exit(1)
+			internal.Fatalf("Could not open wormhole in target directory %q: %v\n", target, err)
 		}
 
-		if err = internal.UpdateDestination("", target); err != nil {
-			log.Printf("Could not save wormhole state for %q: %v\n", target, err)
-			os.Exit(1)
+		if err := internal.UpdateDestination("", target); err != nil {
+			internal.Fatalf("Could not save wormhole state for %q: %v\n", target, err)
 		}
 
 		log.Println("Wormhole open at", target)
