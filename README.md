@@ -27,11 +27,12 @@ Might turn this into a tmux plugin, there is minimal support for that atm.
 
 ## Installation
 
+Make sure you have **Go** installed.
 
 ### Option 1: Install via go install
 
 ```Bash
-go install github.com/waelmahrous/wormhole/cmd/wormhole@latest
+go install github.com/waelmahrous/wormhole@latest
 ```
 
 Make sure your Go bin directory is in your PATH:
