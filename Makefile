@@ -6,16 +6,16 @@ ZSH_SYS_DIR := $(HOME)/.zsh/completions
 BASH_SYS_DIR := $(HOME)/.bash_completion.d
 
 build:
-	mkdir -p $(BIN_DIR)
-	go build -o $(BIN_DIR)/wormhole
+	@mkdir -p "$(BIN_DIR)"
+	@go build -o "$(BIN_DIR)/wormhole"
 
-ZSH_SYS_DIR := $(HOME)/.zsh/completions
+install-zsh-completion: build
+	@mkdir -p "$(ZSH_SYS_DIR)"
+	@"$(BIN_DIR)/wormhole" completion zsh > "$(ZSH_SYS_DIR)/_wormhole"
 
-install-zsh-completion:
-	mkdir -p $(ZSH_SYS_DIR)
-	$(BIN_DIR)/wormhole completion zsh > $(ZSH_SYS_DIR)/_wormhole
-	@echo "Zsh completion installed to $(ZSH_SYS_DIR)/_wormhole"
+install-bash-completion: build
+	@mkdir -p "$(BASH_SYS_DIR)"
+	@"$(BIN_DIR)/wormhole" completion bash > "$(BASH_SYS_DIR)/wormhole"
 
-# COMBINED INSTALL
-install: build install-zsh-completion
-	@echo "wormhole installed with zsh completions."
+install: build install-zsh-completion install-bash-completion
+	@echo "wormhole installed"
