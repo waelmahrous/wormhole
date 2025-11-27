@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 )
 
@@ -19,4 +20,9 @@ func LoadJSON(path string, v any) error {
 		return err
 	}
 	return json.Unmarshal(data, v)
+}
+
+func Fatalf(format string, a ...any) {
+	log.Printf(format, a...)
+	os.Exit(1)
 }

@@ -16,6 +16,13 @@ import (
 
 var copyMode bool
 
+func transfer(src, dst string) error {
+	if copyMode {
+		return copy.Copy(src, dst)
+	}
+	return os.Rename(src, dst)
+}
+
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
 	Use:   "send [files...]",
@@ -25,25 +32,17 @@ var sendCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		target, err := internal.GetDestination(FilePath)
 		if err != nil {
-			log.Printf("No open wormhole: %v\n", err)
-			os.Exit(1)
+			internal.Fatalf("No open wormhole: %v\n", err)
 		}
 
 		log.Println("sending", len(args), "file(s) to", target)
 
-		for _, fileName := range args {
-			dst := filepath.Join(target, fileName)
+		for _, name := range args {
+			src := name
+			dst := filepath.Join(target, name)
 
-			if copyMode {
-				if err := copy.Copy(fileName, dst); err != nil {
-					log.Printf("Failed to copy %q to %q: %v\n", fileName, dst, err)
-					os.Exit(1)
-				}
-			} else {
-				if err := os.Rename(fileName, dst); err != nil {
-					log.Printf("Failed to move %q to %q: %v\n", fileName, dst, err)
-					os.Exit(1)
-				}
+			if err := transfer(src, dst); err != nil {
+				internal.Fatalf("Failed to transfer %q to %q: %v\n", src, dst, err)
 			}
 		}
 	},
