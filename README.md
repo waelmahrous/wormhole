@@ -12,7 +12,7 @@ Might turn this into a tmux plugin, there is minimal support for that atm.
 - [Installation](#installation)
   - [Go](#option-1-install-via-go-install)
   - [Build from source](#option-2-build-from-source)
-  - [tmux integration](#tmux-(TPM))
+  - [tmux integration](#tmux-TPM)
 - [Example Workflow](#example-workflow)
   - [shell](#shell-a-navigate-where-you-want-files-to-land)
   - [tmux usage](#tmux-usage)
@@ -52,7 +52,7 @@ make install
 
 This builds the application and installs shell autocompletion.
 
-### tmux (TPM)
+### tmux TPM
 
 Add this line to your .tmux.conf to install the plugin with TPM:
 
@@ -89,5 +89,5 @@ Prefix-W
 
 ```Bash
 # Instantly opens a wormhole at the current pane’s working directory (no picker).
-Ctrl-w
+Prefix-Ctrl-w
 ```
