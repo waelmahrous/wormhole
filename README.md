@@ -12,7 +12,7 @@ Might turn this into a tmux plugin, there is minimal support for that atm.
 - [Installation](#installation)
   - [Go](#option-1-install-via-go-install)
   - [Build from source](#option-2-build-from-source)
-  - [tmux integration](#tmux-integration)
+  - [tmux integration](#tmux-(TPM))
 - [Example Workflow](#example-workflow)
   - [shell](#shell-a-navigate-where-you-want-files-to-land)
   - [tmux usage](#tmux-usage)
@@ -52,12 +52,12 @@ make install
 
 This builds the application and installs shell autocompletion.
 
-### tmux integration
-There is minimal tmux integration available. Sourcing the tmux file does the trick, but
-this could eventually turn into a fully fledged tmux plugin.
+### tmux (TPM)
+
+Add this line to your .tmux.conf to install the plugin with TPM:
 
 ```Bash
-./wormhole.tmux
+set -g @plugin 'waelmahrous/wormhole'
 ```
 
 ## Example Workflow

@@ -1,4 +1,9 @@
-BIN_DIR := bin
+SHELL := /bin/bash
+.SILENT:
+
+BIN_DIR := $(HOME)/.local/bin
+ZSH_SYS_DIR := $(HOME)/.zsh/completions
+BASH_SYS_DIR := $(HOME)/.bash_completion.d
 
 build:
 	mkdir -p $(BIN_DIR)
