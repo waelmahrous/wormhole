@@ -18,8 +18,7 @@ WORMHOLE_KEY_CURRENT="$(tmux show-option -gqv "@wormhole_key_current")"
 tmux run-shell "${CURRENT_DIR}/wormhole.sh install"
 
 # Choose an open pane
-tmux bind-key "$WORMHOLE_KEY" choose-tree -Z -F \
-  "#{window_index}.#{pane_index}" \
+tmux bind-key "$WORMHOLE_KEY" choose-tree -Z \
   "run-shell \"${CURRENT_DIR}/wormhole.sh open '%%'\""
 
 # Open in current pane
