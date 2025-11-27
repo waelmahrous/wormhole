@@ -1,3 +1,10 @@
+## v0.4.0 (2025-11-27)
+
+### Feat
+
+- add bash completion
+- **tmux**: integrate with TPM
+
 ## v0.3.0 (2025-11-26)
 
 ### Feat
