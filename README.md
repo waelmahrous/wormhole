@@ -23,7 +23,7 @@ Might turn this into a tmux plugin, there is minimal support for that atm.
 - **Send** files or directories into the wormhole
 - **Copy** files without deleting the originals
 - **Check status** 
-- ***(very)* minimal tmux integration**
+- **tmux integration**
 
 ## Installation
 
@@ -74,6 +74,14 @@ wormhole send file1.txt assets/*.png
 ```
 
 ### tmux usage
+
+wormhole comes with two default keybindings which you can alter:
+
+```Bash
+set -g @wormhole_key "W"            # open tree selector
+set -g @wormhole_key_current "C-w"  # choose current pane as destination
+```
+
 ```Bash
 # Opens a tree selector. Pick a pane and a wormhole will open using that pane’s working directory.
 Prefix-W

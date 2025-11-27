@@ -2,17 +2,26 @@
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-DEFAULT_KEY=W
-DEFAULT_KEY_CURRENT=C-w
+# Defaults
+DEFAULT_KEY="W"
+DEFAULT_KEY_CURRENT="C-w"
+
+# Read user-configurable options (if set)
+WORMHOLE_KEY="$(tmux show-option -gqv "@wormhole_key")"
+WORMHOLE_KEY_CURRENT="$(tmux show-option -gqv "@wormhole_key_current")"
+
+# Fall back to defaults if empty
+[ -z "$WORMHOLE_KEY" ] && WORMHOLE_KEY="$DEFAULT_KEY"
+[ -z "$WORMHOLE_KEY_CURRENT" ] && WORMHOLE_KEY_CURRENT="$DEFAULT_KEY_CURRENT"
 
 # Install plugin
 tmux run-shell "${CURRENT_DIR}/wormhole.sh install"
 
 # Choose an open pane
-tmux bind-key $DEFAULT_KEY choose-tree -Z -F \
+tmux bind-key "$WORMHOLE_KEY" choose-tree -Z -F \
   "#{window_index}.#{pane_index}" \
   "run-shell \"${CURRENT_DIR}/wormhole.sh open '%%'\""
 
 # Open in current pane
-tmux bind-key $DEFAULT_KEY_CURRENT \
+tmux bind-key "$WORMHOLE_KEY_CURRENT" \
   "run-shell \"${CURRENT_DIR}/wormhole.sh open\""
