@@ -79,16 +79,16 @@ wormhole send file1.txt assets/*.png
 wormhole comes with two default keybindings which you can alter:
 
 ```Bash
-set -g @wormhole_key "W"            # open tree selector
-set -g @wormhole_key_current "C-w"  # choose current pane as destination
+set -g @wormhole_key "O"            # open tree selector
+set -g @wormhole_key_current "C-o"  # choose current pane as destination
 ```
 
 ```Bash
 # Opens a tree selector. Pick a pane and a wormhole will open using that pane’s working directory.
-Prefix-W
+Prefix-O
 ```
 
 ```Bash
 # Instantly opens a wormhole at the current pane’s working directory (no picker).
-Prefix-Ctrl-w
+Prefix-Ctrl-o
 ```
