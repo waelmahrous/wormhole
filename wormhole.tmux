@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Defaults
-DEFAULT_KEY="W"
-DEFAULT_KEY_CURRENT="C-w"
+DEFAULT_KEY="O"
+DEFAULT_KEY_CURRENT="C-o"
 
 # Read user-configurable options (if set)
 WORMHOLE_KEY="$(tmux show-option -gqv "@wormhole_key")"
@@ -19,8 +19,8 @@ tmux run-shell "${CURRENT_DIR}/wormhole.sh install"
 
 # Choose an open pane
 tmux bind-key "$WORMHOLE_KEY" choose-tree -Z \
-  "run-shell \"${CURRENT_DIR}/wormhole.sh open '%%'\""
+	"run-shell \"${CURRENT_DIR}/wormhole.sh open '%%'\""
 
 # Open in current pane
 tmux bind-key "$WORMHOLE_KEY_CURRENT" \
-  "run-shell \"${CURRENT_DIR}/wormhole.sh open\""
+	"run-shell \"${CURRENT_DIR}/wormhole.sh open\""
