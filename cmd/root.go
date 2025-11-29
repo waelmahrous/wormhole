@@ -38,8 +38,8 @@ var status bool
 var Destination string
 var FilePath string
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "wormhole",
 	Short: "Easily transport files between shells.",
 	Long:  `Easily transport files between shells.`,
@@ -76,7 +76,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
@@ -88,10 +88,10 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")
+	RootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")
 
-	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
-	rootCmd.PersistentFlags().StringVarP(
+	RootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
+	RootCmd.PersistentFlags().StringVarP(
 		&Destination,
 		"destination",
 		"d",
