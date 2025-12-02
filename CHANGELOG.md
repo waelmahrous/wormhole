@@ -1,3 +1,21 @@
+## v0.5.0 (2025-12-02)
+
+### Feat
+
+- **tmux**: change default keybindings (#2)
+- **tmux**: allow user to change default keybindings
+
+### Fix
+
+- **tmux**: remove choose-tree formatting
+
+### Refactor
+
+- migrate to directory-based state management and unify root command behavior
+- **root**: expose root command
+- **open**: cleanup
+- **send**: cleanup
+
 ## v0.4.0 (2025-11-27)
 
 ### Feat
