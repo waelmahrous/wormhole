@@ -35,11 +35,11 @@ import (
 
 var silent bool
 var status bool
-var Destination string
+var StateDir string
 var FilePath string
 
-// RootCmd represents the base command when called without any subcommands
-var RootCmd = &cobra.Command{
+// rootCmd represents the base command when called without any subcommands
+var rootCmd = &cobra.Command{
 	Use:   "wormhole",
 	Short: "Easily transport files between shells.",
 	Long:  `Easily transport files between shells.`,
@@ -49,53 +49,51 @@ var RootCmd = &cobra.Command{
 			log.SetOutput(io.Discard)
 		}
 
-		FilePath = filepath.Join(Destination, ".wormhole.json")
+		FilePath = filepath.Join(StateDir, ".wormhole.json")
 
-		if err := os.MkdirAll(Destination, 0o755); err != nil {
-			log.Printf("Could not create state directory %q: %v\n", Destination, err)
-			os.Exit(1)
+		if _, err := os.Stat(StateDir); os.IsNotExist(err) {
+			if err := os.MkdirAll(StateDir, 0o755); err != nil {
+				internal.Fatalf("Could not create state directory %q: %v\n", StateDir, err)
+			}
 		}
+		// Optionally: ensure file exists as shown above
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if !status {
-			_ = cmd.Help()
+		if status {
+			dest, err := internal.GetDestination(StateDir)
+			if err != nil {
+				internal.Fatalf("No open wormhole: %v\n", err)
+			}
+			fmt.Println(dest)
 			return
 		}
-
-		dest, err := internal.GetDestination(FilePath)
-		if err != nil {
-			log.Printf("No open wormhole: %v\n", err)
-			os.Exit(1)
-		}
-
-		fmt.Println(dest)
+		_ = cmd.Help()
 	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := RootCmd.Execute(); err != nil {
-		os.Exit(1)
+	if err := rootCmd.Execute(); err != nil {
+		internal.Fatalf("%v", err)
 	}
 }
 
 func init() {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
-		log.Println("Could not establish user home directory")
-		os.Exit(1)
+		internal.Fatalf("Could not establish user home directory")
 	}
 
-	RootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")
+	rootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")
 
-	RootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
-	RootCmd.PersistentFlags().StringVarP(
-		&Destination,
-		"destination",
-		"d",
+	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
+	rootCmd.PersistentFlags().StringVarP(
+		&StateDir,
+		"state-dir",
+		"",
 		userHome,
-		"Directory for wormhole state file",
+		"Directory where the wormhole state file is stored",
 	)
 }

@@ -23,16 +23,13 @@ var openCmd = &cobra.Command{
 
 		if destination != "" {
 			target = destination
-			_, err = os.ReadDir(target)
 		} else {
-			target, err = os.Getwd()
+			if target, err = os.Getwd(); err != nil {
+				internal.Fatalf("Could not resolve working directory %v\n", err)
+			}
 		}
 
-		if err != nil {
-			internal.Fatalf("Could not open wormhole in target directory %q: %v\n", target, err)
-		}
-
-		if err := internal.UpdateDestination("", target); err != nil {
+		if err := internal.UpdateDestination(StateDir, target); err != nil {
 			internal.Fatalf("Could not save wormhole state for %q: %v\n", target, err)
 		}
 
@@ -41,7 +38,7 @@ var openCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(openCmd)
+	rootCmd.AddCommand(openCmd)
 
 	openCmd.Flags().StringVarP(
 		&destination,

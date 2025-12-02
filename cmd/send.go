@@ -49,7 +49,7 @@ var sendCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(sendCmd)
+	rootCmd.AddCommand(sendCmd)
 
 	sendCmd.Flags().BoolVarP(&copyMode, "copy", "c", false, "Copy mode (do not move files)")
 }
