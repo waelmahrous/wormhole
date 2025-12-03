@@ -26,6 +26,26 @@ print() {
     echo "$@"
 }
 
+add_alias_if_missing() {
+    local target="$1"
+    local SHELL_RC=""
+
+    case "$SHELL" in
+        *zsh) SHELL_RC="$HOME/.zshrc" ;;
+        *bash) SHELL_RC="$HOME/.bashrc" ;;
+        *) SHELL_RC="$HOME/.profile" ;;
+    esac
+
+    if ! grep -qs 'alias wormhole=' "$SHELL_RC" 2>/dev/null; then
+        print "wormhole: adding alias to $SHELL_RC"
+        {
+            echo ""
+            echo "# added by tmux-wormhole"
+            echo "alias wormhole=\"$target\""
+        } >> "$SHELL_RC"
+    fi
+}
+
 case "$cmd" in
 	install)
 		case "$os" in
@@ -63,6 +83,7 @@ case "$cmd" in
 
 			install -d "$(dirname "${WORMHOLE_BIN}")"
 			install "${src_bin}" "${WORMHOLE_BIN}"
+			add_alias_if_missing "$WORMHOLE_BIN"
 
 			print "wormhole: installed to ${WORMHOLE_BIN}"
 		else
