@@ -32,9 +32,14 @@ import (
 	"github.com/waelmahrous/wormhole/internal"
 )
 
-var silent bool
-var status bool
-var StateDir string
+var (
+	silent      bool
+	status      bool
+	showVersion bool
+	StateDir    string
+
+	version = "dev"
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -64,6 +69,11 @@ var rootCmd = &cobra.Command{
 			fmt.Println(dest)
 			return
 		}
+
+		if showVersion {
+			log.Printf("wormhole version: %s", version)
+			return
+		}
 		_ = cmd.Help()
 	},
 }
@@ -83,6 +93,7 @@ func init() {
 	}
 
 	rootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")
+	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Get wormhole version")
 
 	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
 	rootCmd.PersistentFlags().StringVarP(
