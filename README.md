@@ -84,11 +84,12 @@ wormhole send file1.txt assets/*.png
 
 ### tmux usage
 
-wormhole comes with two default keybindings which you can alter:
+wormhole comes with the following default keybindings which you can alter:
 
 ```Bash
 set -g @wormhole_key "O"            # open tree selector
 set -g @wormhole_key_current "C-o"  # choose current pane as destination
+set -g @wormhole_debug "false"      # show install logs
 ```
 
 ```Bash
