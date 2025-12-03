@@ -1,3 +1,9 @@
+## v0.5.1 (2025-12-03)
+
+### Fix
+
+- **send**: use correct path to state directory
+
 ## v0.5.0 (2025-12-02)
 
 ### Feat
