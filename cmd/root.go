@@ -26,7 +26,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -36,7 +35,6 @@ import (
 var silent bool
 var status bool
 var StateDir string
-var FilePath string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -48,8 +46,6 @@ var rootCmd = &cobra.Command{
 		if silent {
 			log.SetOutput(io.Discard)
 		}
-
-		FilePath = filepath.Join(StateDir, ".wormhole.json")
 
 		if _, err := os.Stat(StateDir); os.IsNotExist(err) {
 			if err := os.MkdirAll(StateDir, 0o755); err != nil {

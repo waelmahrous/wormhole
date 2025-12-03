@@ -30,7 +30,7 @@ var sendCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1), // require at least one file
 
 	Run: func(cmd *cobra.Command, args []string) {
-		target, err := internal.GetDestination(FilePath)
+		target, err := internal.GetDestination(StateDir)
 		if err != nil {
 			internal.Fatalf("No open wormhole: %v\n", err)
 		}
