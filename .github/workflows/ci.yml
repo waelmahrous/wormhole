@@ -3,16 +3,15 @@ name: Go
 on:
   push:
     tags:
-      - 'v*'       # only tag pushes, e.g. v0.6.1
+      - 'v*'
 
 permissions:
-  contents: write  # needed for creating releases
+  contents: write
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      # same as before…
       - uses: actions/checkout@v5
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -23,7 +22,7 @@ jobs:
       - name: Install tparse
         run: go install github.com/mfridman/tparse@latest
       - name: Build
-        run: go build -v ./...
+        run: make build BIN_DIR="$PWD/dist" BINARY_NAME="wormhole"
       - name: Test Internal
         run: go test ./internal -json | tparse -all -notests
 
@@ -54,10 +53,16 @@ jobs:
         run: go mod download
 
       - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          VERSION: ${{ github.ref_name }}
         run: |
           mkdir -p dist
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
-            go build -o dist/${{ env.BINARY_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          make build \
+            LDFLAGS="-X github.com/waelmahrous/wormhole/cmd.version=${VERSION}" \
+            BIN_DIR="dist" \
+            BINARY_NAME="${{ env.BINARY_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
 
       - name: Package archive
         run: |

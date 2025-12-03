@@ -1,13 +1,15 @@
 SHELL := /bin/bash
 .SILENT:
 
-BIN_DIR := $(HOME)/.local/bin
+BIN_DIR ?= $(HOME)/.local/bin
+LDFLAGS ?=
+BINARY_NAME ?= wormhole
 ZSH_SYS_DIR := $(HOME)/.zsh/completions
 BASH_SYS_DIR := $(HOME)/.bash_completion.d
 
 build:
 	@mkdir -p "$(BIN_DIR)"
-	@go build -o "$(BIN_DIR)/wormhole"
+	@go build -ldflags "$(LDFLAGS)" -o "$(BIN_DIR)/$(BINARY_NAME)"
 
 install-zsh-completion: build
 	@mkdir -p "$(ZSH_SYS_DIR)"
