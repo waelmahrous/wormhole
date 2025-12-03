@@ -1,3 +1,11 @@
+## v0.6.0 (2025-12-03)
+
+### Feat
+
+- default to install binaries
+- build with make
+- upload binary artifacts
+
 ## v0.5.1 (2025-12-03)
 
 ### Fix
