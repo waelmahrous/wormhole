@@ -1,0 +1,74 @@
+name: Go
+
+on:
+  push:
+    tags:
+      - 'v*'       # only tag pushes, e.g. v0.6.1
+
+permissions:
+  contents: write  # needed for creating releases
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # same as before…
+      - uses: actions/checkout@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.4'
+      - name: Download modules
+        run: go mod download
+      - name: Install tparse
+        run: go install github.com/mfridman/tparse@latest
+      - name: Build
+        run: go build -v ./...
+      - name: Test Internal
+        run: go test ./internal -json | tparse -all -notests
+
+  build-binaries:
+    needs: test
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
+
+    env:
+      GO_VERSION: '1.25.4'
+      BINARY_NAME: wormhole
+      VERSION: ${{ github.ref_name }}   # e.g. v0.6.1
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Build binary
+        run: |
+          mkdir -p dist
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
+            go build -o dist/${{ env.BINARY_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}
+
+      - name: Package archive
+        run: |
+          ARCHIVE="dist/${{ env.BINARY_NAME }}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
+          tar -czf "${ARCHIVE}" -C dist \
+            "${{ env.BINARY_NAME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+          echo "ARCHIVE=${ARCHIVE}" >> "$GITHUB_ENV"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ARCHIVE }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
