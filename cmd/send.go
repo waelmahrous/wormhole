@@ -4,6 +4,7 @@ Copyright © 2025 Wael Mahrous
 package cmd
 
 import (
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,11 +17,31 @@ import (
 
 var copyMode bool
 
-func transfer(src, dst string) error {
-	if copyMode {
-		return copy.Copy(src, dst)
+func Transfer(src []string, dst string) ([]string, error) {
+	if len(src) < 1 {
+		return nil, errors.New("no files to send")
 	}
-	return os.Rename(src, dst)
+
+	output := []string{}
+
+	for _, v := range src {
+		filePath := filepath.Join(filepath.Join(dst, filepath.Base(v)))
+		if err := copy.Copy(v, filePath); err != nil {
+			return output, err
+		}
+
+		output = append(output, filePath)
+
+		if copyMode {
+			continue
+		}
+
+		if err := os.Remove(v); err != nil {
+			return output, err
+		}
+	}
+
+	return output, nil
 }
 
 // sendCmd represents the send command
@@ -37,13 +58,8 @@ var sendCmd = &cobra.Command{
 
 		log.Println("sending", len(args), "file(s) to", target)
 
-		for _, name := range args {
-			src := name
-			dst := filepath.Join(target, name)
-
-			if err := transfer(src, dst); err != nil {
-				internal.Fatalf("Failed to transfer %q to %q: %v\n", src, dst, err)
-			}
+		if _, err := Transfer(args, target); err != nil {
+			internal.Fatalf("Error: %v", err)
 		}
 	},
 }
