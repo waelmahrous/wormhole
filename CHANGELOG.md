@@ -1,3 +1,20 @@
+## v0.7.0 (2025-12-10)
+
+### BREAKING CHANGE
+
+- existing .wormhole.json state will no longer be read.
+
+### Feat
+
+- add to path on install
+- silence tmux output if not debugging
+
+### Refactor
+
+- change wormhole backend from json to storm
+- remove unnecessary internal logging
+- **send**: add tests and send by copy first
+
 ## v0.6.0 (2025-12-03)
 
 ### Feat
