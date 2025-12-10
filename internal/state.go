@@ -4,74 +4,113 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"github.com/asdine/storm/v3"
+	"github.com/otiai10/copy"
 )
 
-type WormholeState struct {
-	Destination string `json:"destination"`
+const (
+	StoreName          = ".wormhole.db"
+	DefaultID          = "0"
+	DefaultDestination = ""
+)
+
+type Wormhole struct {
+	ID          string `storm:"id"`
+	Destination string
 }
 
-const defaultStateFile = ".wormhole.json"
+func SetDestination(path string, target string) (Wormhole, error) {
+	if db, err := storm.Open(filepath.Join(path, StoreName)); err != nil {
+		return Wormhole{}, err
+	} else {
+		defer db.Close()
 
-func resolveStatePath(path string) (string, error) {
-	if path != "" {
-		if _, err := os.ReadDir(path); err != nil {
-			return "", err
+		var wormhole Wormhole
+
+		if err := db.One("ID", DefaultID, &wormhole); err != nil {
+			return Wormhole{}, err
+		} else {
+			wormhole.Destination = target
+			if err := db.Save(&wormhole); err != nil {
+				return Wormhole{}, err
+			}
+
+			return wormhole, nil
 		}
-		return filepath.Join(path, defaultStateFile), nil
 	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(home, defaultStateFile), nil
-}
-
-func SaveWormholeState(path string, state WormholeState) error {
-	statePath, err := resolveStatePath(path)
-	if err != nil {
-		return err
-	}
-	return SaveJSON(statePath, state)
-}
-
-func LoadWormholeState(path string) (WormholeState, error) {
-	statePath, err := resolveStatePath(path)
-	if err != nil {
-		return WormholeState{}, err
-	}
-
-	var state WormholeState
-	err = LoadJSON(statePath, &state)
-
-	if os.IsNotExist(err) {
-		return WormholeState{}, nil
-	}
-
-	return state, err
-}
-
-func UpdateDestination(path, dest string) error {
-	state, err := LoadWormholeState(path)
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.ReadDir(dest); err != nil {
-		return err
-	}
-
-	state.Destination = dest
-	return SaveWormholeState(path, state)
 }
 
 func GetDestination(path string) (string, error) {
-	state, err := LoadWormholeState(path)
-	if err != nil {
+	if db, err := storm.Open(filepath.Join(path, StoreName)); err != nil {
 		return "", err
+	} else {
+		defer db.Close()
+
+		var wormhole Wormhole
+
+		if err := db.One("ID", DefaultID, &wormhole); err != nil {
+			return "", err
+		} else {
+			if wormhole.Destination == "" {
+				return "", errors.New("no wormhole open")
+			}
+
+			return wormhole.Destination, nil
+		}
 	}
-	if state.Destination == "" {
-		return "", errors.New("no wormhole destination set")
+}
+
+func InitWormholeStore(path string) error {
+	if path == "" {
+		return errors.New("empty state directory")
 	}
-	return state.Destination, nil
+
+	if _, err := os.Stat(filepath.Join(path, StoreName)); err == nil {
+		return nil
+	}
+
+	if db, err := storm.Open(filepath.Join(path, StoreName)); err != nil {
+		return err
+	} else {
+		defer db.Close()
+
+		wormhole := Wormhole{
+			ID:          DefaultID,
+			Destination: DefaultDestination,
+		}
+
+		if err := db.Save(&wormhole); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func Transfer(src []string, dst string, copyMode bool) ([]string, error) {
+	if len(src) < 1 {
+		return nil, errors.New("no files to send")
+	}
+
+	output := []string{}
+
+	for _, v := range src {
+		filePath := filepath.Join(filepath.Join(dst, filepath.Base(v)))
+		if err := copy.Copy(v, filePath); err != nil {
+			return output, err
+		}
+
+		output = append(output, filePath)
+
+		if copyMode {
+			continue
+		}
+
+		if err := os.Remove(v); err != nil {
+			return output, err
+		}
+	}
+
+	return output, nil
 }

@@ -4,45 +4,13 @@ Copyright © 2025 Wael Mahrous
 package cmd
 
 import (
-	"errors"
 	"log"
-	"os"
-	"path/filepath"
 
-	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
-
 	"github.com/waelmahrous/wormhole/internal"
 )
 
 var copyMode bool
-
-func Transfer(src []string, dst string) ([]string, error) {
-	if len(src) < 1 {
-		return nil, errors.New("no files to send")
-	}
-
-	output := []string{}
-
-	for _, v := range src {
-		filePath := filepath.Join(filepath.Join(dst, filepath.Base(v)))
-		if err := copy.Copy(v, filePath); err != nil {
-			return output, err
-		}
-
-		output = append(output, filePath)
-
-		if copyMode {
-			continue
-		}
-
-		if err := os.Remove(v); err != nil {
-			return output, err
-		}
-	}
-
-	return output, nil
-}
 
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
@@ -58,7 +26,7 @@ var sendCmd = &cobra.Command{
 
 		log.Println("sending", len(args), "file(s) to", target)
 
-		if _, err := Transfer(args, target); err != nil {
+		if _, err := internal.Transfer(args, target, copyMode); err != nil {
 			log.Fatalf("Error: %v", err)
 		}
 	},

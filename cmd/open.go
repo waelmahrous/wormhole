@@ -18,8 +18,10 @@ var openCmd = &cobra.Command{
 	Use:   "open",
 	Short: "Open a wormhole in the current directory",
 	Run: func(cmd *cobra.Command, args []string) {
-		var target string
-		var err error
+		var (
+			target string
+			err    error
+		)
 
 		if destination != "" {
 			target = destination
@@ -29,11 +31,11 @@ var openCmd = &cobra.Command{
 			}
 		}
 
-		if err := internal.UpdateDestination(StateDir, target); err != nil {
-			log.Fatalf("Could not save wormhole state for %q: %v\n", target, err)
+		if wormhole, err := internal.SetDestination(StateDir, target); err != nil {
+			log.Fatalf("Could not open wormhole in %q: %v\n", target, err)
+		} else {
+			log.Printf("Wormhole open at %s", wormhole.Destination)
 		}
-
-		log.Printf("Wormhole open at %s", target)
 	},
 }
 

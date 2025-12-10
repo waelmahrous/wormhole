@@ -1,134 +1,226 @@
 package internal_test
 
 import (
-	"fmt"
+	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
+	"github.com/asdine/storm/v3"
 	"github.com/waelmahrous/wormhole/internal"
 )
 
-func TestSaveWormholeState(t *testing.T) {
-	var (
-		state   = internal.WormholeState{}
-		tempDir = t.TempDir()
-	)
-
-	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		path    string
-		state   internal.WormholeState
-		wantErr bool
-	}{
-		{"error when path is a file", fmt.Sprintf("%s/.extension", tempDir), state, true},
-		{"success with directory path", fmt.Sprintf("%s", tempDir), state, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotErr := internal.SaveWormholeState(tt.path, tt.state)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("SaveWormholeState() failed: %v", gotErr)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Fatal("SaveWormholeState() succeeded unexpectedly")
-			}
-		})
-	}
-}
-
-func TestUpdateDestination(t *testing.T) {
-	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		path    string
-		dest    string
-		wantErr bool
-	}{
-		{
-			name:    "error on invalid directory",
-			path:    filepath.Join(t.TempDir(), "invalid_directory"),
-			dest:    t.TempDir(),
-			wantErr: true,
-		},
-		{
-			name:    "error on invalid target",
-			path:    t.TempDir(),
-			dest:    filepath.Join(t.TempDir(), "invalid_directory"),
-			wantErr: true,
-		},
-		{
-			name:    "update target destination in state file",
-			path:    t.TempDir(),
-			dest:    t.TempDir(),
-			wantErr: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotErr := internal.UpdateDestination(tt.path, tt.dest)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("UpdateDestination() failed: %v", gotErr)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Fatal("UpdateDestination() succeeded unexpectedly")
-			}
-
-			state, err := internal.LoadWormholeState(tt.path)
-			if err != nil {
-				t.Fatalf("LoadWormholeState() failed after update: %v", err)
-			}
-
-			if state.Destination != tt.dest {
-				t.Fatalf("Destination not updated: got %q, want %q", state.Destination, tt.dest)
-			}
-		})
-	}
-}
-
-func TestLoadWormholeState(t *testing.T) {
+func TestInitWormholeStore(t *testing.T) {
 	tempDir := t.TempDir()
+
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		path    string
-		want    internal.WormholeState
+		name string
+		path string
+
 		wantErr bool
 	}{
 		{
-			name:    "load correct state",
+			name:    "zero: error on empty state directory",
+			path:    "",
+			wantErr: true,
+		},
+		{
+			name:    "one: success on good directory",
 			path:    tempDir,
 			wantErr: false,
-			want: internal.WormholeState{
-				Destination: tempDir,
-			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			internal.UpdateDestination(tt.path, tt.want.Destination)
-
-			got, gotErr := internal.LoadWormholeState(tt.path)
+			gotErr := internal.InitWormholeStore(tt.path)
 			if gotErr != nil {
 				if !tt.wantErr {
-					t.Errorf("LoadWormholeState() failed: %v", gotErr)
+					t.Errorf("InitWormholeStore() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("InitWormholeStore() succeeded unexpectedly")
+			}
+
+			// Expected in good wormholes
+			if _, err := os.Stat(filepath.Join(tempDir, internal.StoreName)); err != nil {
+				t.Errorf("InitWormholeStore() failed: %v", err)
+			} else {
+				if db, err := storm.Open(filepath.Join(tt.path, internal.StoreName)); err != nil {
+					t.Errorf("InitWormholeStore() failed: %v", err)
+				} else {
+					var ws internal.Wormhole
+					if err := db.One("ID", "0", &ws); err != nil {
+						t.Fatalf("expected default wormhole, got error: %v", err)
+					}
+
+					db.Close()
+
+					// Check that we dont reset
+					internal.SetDestination(tt.path, tt.path)
+					if err := internal.InitWormholeStore(tt.path); err != nil {
+						t.Errorf("InitWormholeStore() failed: %v", err)
+					} else {
+						if dest, _ := internal.GetDestination(tt.path); dest == "" {
+							t.Errorf("InitWormholeStore() failed, state got reset: %s", dest)
+						}
+					}
+
+					db.Close()
+				}
+			}
+
+		})
+	}
+}
+
+func TestGetDestination(t *testing.T) {
+	tests := []struct {
+		name string
+
+		path    string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "zero: error on empty destination",
+			path:    t.TempDir(),
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "one: return correct destination",
+			path:    t.TempDir(),
+			want:    t.TempDir(),
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		if err := internal.InitWormholeStore(tt.path); err != nil {
+			t.Fatal(err)
+		}
+
+		if _, err := internal.SetDestination(tt.path, tt.want); err != nil {
+			t.Fatal(err)
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := internal.GetDestination(tt.path)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("GetDestination() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("GetDestination() succeeded unexpectedly")
+			}
+
+			if tt.want != got {
+				t.Errorf("GetDestination() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSetDestination(t *testing.T) {
+	tempDir := t.TempDir()
+
+	tests := []struct {
+		name string
+
+		path    string
+		target  string
+		want    internal.Wormhole
+		wantErr bool
+	}{
+		{
+			name:    "zero: success set destination",
+			path:    t.TempDir(),
+			target:  tempDir,
+			want:    internal.Wormhole{Destination: tempDir},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		if err := internal.InitWormholeStore(tt.path); err != nil {
+			t.Fatal(err)
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := internal.SetDestination(tt.path, tt.target)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("SetDestination() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("SetDestination() succeeded unexpectedly")
+			}
+
+			if tt.want.Destination != got.Destination {
+				t.Errorf("SetDestination() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTransfer(t *testing.T) {
+	from := t.TempDir()
+	to := t.TempDir()
+	tempFile, err := os.CreateTemp(from, "")
+
+	if err != nil {
+		t.Fatalf("Could not create temp file")
+	}
+
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		src     []string
+		dst     string
+		want    []string
+		wantErr bool
+	}{
+		{
+			name:    "fail on no files to send",
+			src:     []string{},
+			dst:     "",
+			want:    []string{},
+			wantErr: true,
+		},
+		{
+			name:    "send one file",
+			src:     []string{tempFile.Name()},
+			dst:     to,
+			want:    []string{filepath.Join(to, filepath.Base(tempFile.Name()))},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := internal.Transfer(tt.src, tt.dst, false)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("Transfer() failed: %v", gotErr)
 				}
 				return
 			}
 
-			if tt.wantErr {
-				t.Fatal("LoadWormholeState() succeeded unexpectedly")
+			for _, w := range tt.want {
+				if !slices.Contains(got, w) {
+					t.Fatalf("expected %q to be in got %v", w, got)
+				}
+
+				if _, err := os.Stat(w); err != nil {
+					t.Fatalf("Transfer() failed: %v", err)
+				}
 			}
 
-			if got != tt.want {
-				t.Errorf("LoadWormholeState() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				t.Fatal("Transfer() succeeded unexpectedly")
 			}
 		})
 	}

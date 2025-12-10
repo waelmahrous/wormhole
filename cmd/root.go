@@ -22,13 +22,11 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
 
 	"github.com/spf13/cobra"
-
 	"github.com/waelmahrous/wormhole/internal"
 )
 
@@ -51,30 +49,28 @@ var rootCmd = &cobra.Command{
 		if silent {
 			log.SetOutput(io.Discard)
 		}
-
-		if _, err := os.Stat(StateDir); os.IsNotExist(err) {
-			if err := os.MkdirAll(StateDir, 0o755); err != nil {
-				log.Fatalf("Could not create state directory %q: %v\n", StateDir, err)
-			}
-		}
-		// Optionally: ensure file exists as shown above
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if status {
-			dest, err := internal.GetDestination(StateDir)
-			if err != nil {
-				log.Fatalf("No open wormhole: %v\n", err)
+		if err := internal.InitWormholeStore(StateDir); err != nil {
+			log.Fatal(err)
+		} else {
+			if status {
+				if dest, err := internal.GetDestination(StateDir); err != nil {
+					log.Fatalf("Could not get destination: %v\n", err)
+				} else {
+					log.Printf("Wormhole open in: %s", dest)
+					return
+				}
 			}
-			fmt.Println(dest)
-			return
-		}
 
-		if showVersion {
-			log.Printf("wormhole version: %s", version)
-			return
+			if showVersion {
+				log.Printf("wormhole version: %s", version)
+				return
+			}
+
+			_ = cmd.Help()
 		}
-		_ = cmd.Help()
 	},
 }
 
