@@ -1,3 +1,9 @@
+## v0.7.1 (2025-12-10)
+
+### Fix
+
+- **send**: return error when sending directories or overwriting files
+
 ## v0.7.0 (2025-12-10)
 
 ### BREAKING CHANGE
