@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 
 		if _, err := os.Stat(StateDir); os.IsNotExist(err) {
 			if err := os.MkdirAll(StateDir, 0o755); err != nil {
-				internal.Fatalf("Could not create state directory %q: %v\n", StateDir, err)
+				log.Fatalf("Could not create state directory %q: %v\n", StateDir, err)
 			}
 		}
 		// Optionally: ensure file exists as shown above
@@ -64,7 +64,7 @@ var rootCmd = &cobra.Command{
 		if status {
 			dest, err := internal.GetDestination(StateDir)
 			if err != nil {
-				internal.Fatalf("No open wormhole: %v\n", err)
+				log.Fatalf("No open wormhole: %v\n", err)
 			}
 			fmt.Println(dest)
 			return
@@ -82,14 +82,14 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		internal.Fatalf("%v", err)
+		log.Fatalf("%v", err)
 	}
 }
 
 func init() {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
-		internal.Fatalf("Could not establish user home directory")
+		log.Fatalf("Could not establish user home directory")
 	}
 
 	rootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")

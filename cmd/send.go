@@ -53,13 +53,13 @@ var sendCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		target, err := internal.GetDestination(StateDir)
 		if err != nil {
-			internal.Fatalf("No open wormhole: %v\n", err)
+			log.Fatalf("No open wormhole: %v\n", err)
 		}
 
 		log.Println("sending", len(args), "file(s) to", target)
 
 		if _, err := Transfer(args, target); err != nil {
-			internal.Fatalf("Error: %v", err)
+			log.Fatalf("Error: %v", err)
 		}
 	},
 }
