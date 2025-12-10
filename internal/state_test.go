@@ -198,6 +198,13 @@ func TestTransfer(t *testing.T) {
 			want:    []string{filepath.Join(to, filepath.Base(tempFile.Name()))},
 			wantErr: false,
 		},
+		{
+			name:    "fail on src is dir",
+			src:     []string{from},
+			dst:     to,
+			want:    []string{},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -96,7 +96,16 @@ func Transfer(src []string, dst string, copyMode bool) ([]string, error) {
 	output := []string{}
 
 	for _, v := range src {
+		if _, err := os.ReadDir(v); err == nil {
+			return output, errors.New("this is a directory")
+		}
+
 		filePath := filepath.Join(filepath.Join(dst, filepath.Base(v)))
+
+		if _, err := os.Stat(filePath); err == nil {
+			return output, errors.New("file already exists in target directory")
+		}
+
 		if err := copy.Copy(v, filePath); err != nil {
 			return output, err
 		}
