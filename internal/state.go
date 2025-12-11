@@ -20,45 +20,60 @@ type Wormhole struct {
 	Destination string
 }
 
-func SetDestination(path string, target string) (Wormhole, error) {
+type TransferRecord struct {
+	ID          int `storm:"id,increment"`
+	Source      []string
+	Destination string
+	Copy        bool
+	StateDir    string
+}
+
+type Operation func(*storm.DB) error
+
+func withDB(path string, op Operation) error {
 	if db, err := storm.Open(filepath.Join(path, StoreName)); err != nil {
-		return Wormhole{}, err
+		return err
 	} else {
 		defer db.Close()
-
-		var wormhole Wormhole
-
-		if err := db.One("ID", DefaultID, &wormhole); err != nil {
-			return Wormhole{}, err
-		} else {
-			wormhole.Destination = target
-			if err := db.Save(&wormhole); err != nil {
-				return Wormhole{}, err
-			}
-
-			return wormhole, nil
-		}
+		return op(db)
 	}
 }
 
-func GetDestination(path string) (string, error) {
-	if db, err := storm.Open(filepath.Join(path, StoreName)); err != nil {
-		return "", err
-	} else {
-		defer db.Close()
+func SetDestination(path string, target string) (Wormhole, error) {
+	var wormhole Wormhole
 
+	err := withDB(path, func(db *storm.DB) error {
+		if err := db.One("ID", DefaultID, &wormhole); err != nil {
+			return err
+		}
+
+		wormhole.Destination = target
+		return db.Save(&wormhole)
+	})
+
+	return wormhole, err
+}
+
+func GetDestination(path string) (string, error) {
+	var err error
+	var destination string
+
+	err = withDB(path, func(db *storm.DB) error {
 		var wormhole Wormhole
 
 		if err := db.One("ID", DefaultID, &wormhole); err != nil {
-			return "", err
+			return err
 		} else {
 			if wormhole.Destination == "" {
-				return "", errors.New("no wormhole open")
+				return errors.New("no wormhole open")
 			}
 
-			return wormhole.Destination, nil
+			destination = wormhole.Destination
+			return nil
 		}
-	}
+	})
+
+	return destination, err
 }
 
 func InitWormholeStore(path string) error {
@@ -70,37 +85,29 @@ func InitWormholeStore(path string) error {
 		return nil
 	}
 
-	if db, err := storm.Open(filepath.Join(path, StoreName)); err != nil {
-		return err
-	} else {
-		defer db.Close()
-
+	return withDB(path, func(db *storm.DB) error {
 		wormhole := Wormhole{
 			ID:          DefaultID,
 			Destination: DefaultDestination,
 		}
 
-		if err := db.Save(&wormhole); err != nil {
-			return err
-		}
-
-		return nil
-	}
+		return db.Save(&wormhole)
+	})
 }
 
-func Transfer(src []string, dst string, copyMode bool) ([]string, error) {
-	if len(src) < 1 {
+func Transfer(record TransferRecord) ([]string, error) {
+	if len(record.Source) < 1 {
 		return nil, errors.New("no files to send")
 	}
 
 	output := []string{}
 
-	for _, v := range src {
+	for _, v := range record.Source {
 		if _, err := os.ReadDir(v); err == nil {
 			return output, errors.New("this is a directory")
 		}
 
-		filePath := filepath.Join(filepath.Join(dst, filepath.Base(v)))
+		filePath := filepath.Join(filepath.Join(record.Destination, filepath.Base(v)))
 
 		if _, err := os.Stat(filePath); err == nil {
 			return output, errors.New("file already exists in target directory")
@@ -112,7 +119,7 @@ func Transfer(src []string, dst string, copyMode bool) ([]string, error) {
 
 		output = append(output, filePath)
 
-		if copyMode {
+		if record.Copy {
 			continue
 		}
 

@@ -26,7 +26,14 @@ var sendCmd = &cobra.Command{
 
 		log.Println("sending", len(args), "file(s) to", target)
 
-		if _, err := internal.Transfer(args, target, copyMode); err != nil {
+		record := internal.TransferRecord{
+			Source:      args,
+			Destination: target,
+			Copy:        copyMode,
+			StateDir:    StateDir,
+		}
+
+		if _, err := internal.Transfer(record); err != nil {
 			log.Fatalf("Error: %v", err)
 		}
 	},

@@ -208,7 +208,12 @@ func TestTransfer(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := internal.Transfer(tt.src, tt.dst, false)
+			record := internal.TransferRecord{
+				Source:      tt.src,
+				Destination: tt.dst,
+				Copy:        false,
+			}
+			got, gotErr := internal.Transfer(record)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("Transfer() failed: %v", gotErr)
