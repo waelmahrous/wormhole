@@ -206,12 +206,21 @@ func TestTransfer(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
+	if err := internal.InitWormholeStore(from); err != nil {
+		t.Errorf("Transfer() failed: %v", err)
+	}
+
+	if _, err := internal.SetDestination(from, to); err != nil {
+		t.Errorf("Transfer() failed: %v", err)
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			record := internal.TransferRecord{
-				Source:      tt.src,
-				Destination: tt.dst,
-				Copy:        false,
+				Source:   tt.src,
+				Copy:     false,
+				StateDir: from,
 			}
 			got, gotErr := internal.Transfer(record)
 			if gotErr != nil {

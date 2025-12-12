@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -23,9 +24,10 @@ type Wormhole struct {
 type TransferRecord struct {
 	ID          int `storm:"id,increment"`
 	Source      []string
-	Destination string
 	Copy        bool
 	StateDir    string
+	Destination string
+	WorkDir     string
 }
 
 type Operation func(*storm.DB) error
@@ -96,37 +98,49 @@ func InitWormholeStore(path string) error {
 }
 
 func Transfer(record TransferRecord) ([]string, error) {
-	if len(record.Source) < 1 {
+	if len(record.Source) == 0 {
 		return nil, errors.New("no files to send")
 	}
 
-	output := []string{}
+	destination, err := GetDestination(record.StateDir)
+	if err != nil {
+		return nil, err
+	}
 
-	for _, v := range record.Source {
-		if _, err := os.ReadDir(v); err == nil {
+	var output []string
+
+	for _, src := range record.Source {
+		if _, err := os.ReadDir(src); err == nil {
 			return output, errors.New("this is a directory")
 		}
 
-		filePath := filepath.Join(filepath.Join(record.Destination, filepath.Base(v)))
+		filePath := filepath.Join(destination, filepath.Base(src))
 
 		if _, err := os.Stat(filePath); err == nil {
 			return output, errors.New("file already exists in target directory")
 		}
 
-		if err := copy.Copy(v, filePath); err != nil {
+		if err := copy.Copy(src, filePath); err != nil {
 			return output, err
 		}
 
 		output = append(output, filePath)
 
-		if record.Copy {
-			continue
-		}
-
-		if err := os.Remove(v); err != nil {
-			return output, err
+		if !record.Copy {
+			if err := os.Remove(src); err != nil {
+				return output, err
+			}
 		}
 	}
 
-	return output, nil
+	return output, withDB(record.StateDir, func(db *storm.DB) error {
+		record.Destination = destination
+		if wd, err := os.Getwd(); err != nil {
+			return fmt.Errorf("could not establish working directory, %v", err)
+		} else {
+			record.WorkDir = wd
+		}
+
+		return db.Save(&record)
+	})
 }

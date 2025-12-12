@@ -28,7 +28,6 @@ var sendCmd = &cobra.Command{
 
 		record := internal.TransferRecord{
 			Source:      args,
-			Destination: target,
 			Copy:        copyMode,
 			StateDir:    StateDir,
 		}
