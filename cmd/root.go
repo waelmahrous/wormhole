@@ -46,31 +46,31 @@ var rootCmd = &cobra.Command{
 	Long:  `Easily transport files between shells.`,
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if err := internal.InitWormholeStore(StateDir); err != nil {
+			log.Fatal(err)
+		}
+
 		if silent {
 			log.SetOutput(io.Discard)
 		}
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := internal.InitWormholeStore(StateDir); err != nil {
-			log.Fatal(err)
-		} else {
-			if status {
-				if dest, err := internal.GetDestination(StateDir); err != nil {
-					log.Fatalf("Could not get destination: %v\n", err)
-				} else {
-					log.Printf("Wormhole open in: %s", dest)
-					return
-				}
-			}
-
-			if showVersion {
-				log.Printf("wormhole version: %s", version)
+		if status {
+			if dest, err := internal.GetDestination(StateDir); err != nil {
+				log.Fatalf("Could not get destination: %v\n", err)
+			} else {
+				log.Printf("Wormhole open in: %s", dest)
 				return
 			}
-
-			_ = cmd.Help()
 		}
+
+		if showVersion {
+			log.Printf("wormhole version: %s", version)
+			return
+		}
+
+		_ = cmd.Help()
 	},
 }
 

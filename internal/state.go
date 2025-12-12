@@ -81,17 +81,17 @@ func InitWormholeStore(path string) error {
 		return errors.New("empty state directory")
 	}
 
-	if _, err := os.Stat(filepath.Join(path, StoreName)); err == nil {
-		return nil
+	wormhole := Wormhole{
+		ID:          DefaultID,
+		Destination: DefaultDestination,
 	}
 
 	return withDB(path, func(db *storm.DB) error {
-		wormhole := Wormhole{
-			ID:          DefaultID,
-			Destination: DefaultDestination,
+		if err := db.One("ID", DefaultID, &wormhole); err != nil {
+			return db.Save(&wormhole)
 		}
 
-		return db.Save(&wormhole)
+		return nil
 	})
 }
 
