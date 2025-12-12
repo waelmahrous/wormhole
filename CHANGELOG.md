@@ -1,3 +1,13 @@
+## v0.7.2 (2025-12-12)
+
+### Fix
+
+- **root**: create state file on any command
+
+### Refactor
+
+- **internal**: add withDB helper and introduce transfer record
+
 ## v0.7.1 (2025-12-10)
 
 ### Fix
