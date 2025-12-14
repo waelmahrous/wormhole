@@ -90,6 +90,7 @@ wormhole comes with the following default keybindings which you can alter:
 set -g @wormhole_key "O"            # open tree selector
 set -g @wormhole_key_current "C-o"  # choose current pane as destination
 set -g @wormhole_debug "false"      # show install logs
+set -g @wormhole_key_jump "j"       # Open new window at wormhole
 ```
 
 ```Bash

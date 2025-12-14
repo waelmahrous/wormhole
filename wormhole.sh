@@ -100,6 +100,11 @@ case "$cmd" in
 		tmux display-message "$out"
 		exit 0
 		;;
+	jump)
+		dir="$("$WORMHOLE_BIN" --status 2>&1 | sed -n 's/.*open in: //p' | head -n1 | tr -d '\r\n')"
+		[ -n "$dir" ] && tmux new-window -c "$dir"
+		exit 0
+		;;
 	*)
 		tmux display-message "wormhole.sh: invalid command '$cmd'"
 		exit 1
