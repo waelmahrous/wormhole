@@ -32,7 +32,12 @@ func TestInitWormholeStore(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotErr := internal.InitWormholeStore(tt.path)
+			w := internal.Wormhole{
+				ID:          internal.DefaultID,
+				Destination: internal.DefaultDestination,
+				StateDir:    tt.path,
+			}
+			gotErr := w.InitWormholeStore()
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("InitWormholeStore() failed: %v", gotErr)
@@ -58,11 +63,11 @@ func TestInitWormholeStore(t *testing.T) {
 					db.Close()
 
 					// Check that we dont reset
-					internal.SetDestination(tt.path, tt.path)
-					if err := internal.InitWormholeStore(tt.path); err != nil {
+					w.SetDestination(tt.path)
+					if err := w.InitWormholeStore(); err != nil {
 						t.Errorf("InitWormholeStore() failed: %v", err)
 					} else {
-						if dest, _ := internal.GetDestination(tt.path); dest == "" {
+						if dest, _ := w.GetDestination(); dest == "" {
 							t.Errorf("InitWormholeStore() failed, state got reset: %s", dest)
 						}
 					}
@@ -97,16 +102,21 @@ func TestGetDestination(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		if err := internal.InitWormholeStore(tt.path); err != nil {
+		w := internal.Wormhole{
+			ID:          internal.DefaultID,
+			Destination: internal.DefaultDestination,
+			StateDir:    tt.path,
+		}
+		if err := w.InitWormholeStore(); err != nil {
 			t.Fatal(err)
 		}
 
-		if _, err := internal.SetDestination(tt.path, tt.want); err != nil {
+		if _, err := w.SetDestination(tt.want); err != nil {
 			t.Fatal(err)
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := internal.GetDestination(tt.path)
+			got, gotErr := w.GetDestination()
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("GetDestination() failed: %v", gotErr)
@@ -144,12 +154,18 @@ func TestSetDestination(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		if err := internal.InitWormholeStore(tt.path); err != nil {
+		w := internal.Wormhole{
+			ID:          internal.DefaultID,
+			Destination: internal.DefaultDestination,
+			StateDir:    tt.path,
+		}
+
+		if err := w.InitWormholeStore(); err != nil {
 			t.Fatal(err)
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := internal.SetDestination(tt.path, tt.target)
+			got, gotErr := w.SetDestination(tt.target)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("SetDestination() failed: %v", gotErr)
@@ -207,11 +223,17 @@ func TestTransfer(t *testing.T) {
 		},
 	}
 
-	if err := internal.InitWormholeStore(from); err != nil {
-		t.Errorf("Transfer() failed: %v", err)
+	w := internal.Wormhole{
+		ID:          internal.DefaultID,
+		Destination: internal.DefaultDestination,
+		StateDir:    from,
 	}
 
-	if _, err := internal.SetDestination(from, to); err != nil {
+	if err := w.InitWormholeStore(); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := w.SetDestination(to); err != nil {
 		t.Errorf("Transfer() failed: %v", err)
 	}
 
@@ -220,9 +242,8 @@ func TestTransfer(t *testing.T) {
 			record := internal.TransferRecord{
 				Source:   tt.src,
 				Copy:     false,
-				StateDir: from,
 			}
-			got, gotErr := internal.Transfer(record)
+			got, gotErr := w.Transfer(record)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("Transfer() failed: %v", gotErr)

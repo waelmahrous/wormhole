@@ -19,7 +19,7 @@ var sendCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1), // require at least one file
 
 	Run: func(cmd *cobra.Command, args []string) {
-		target, err := internal.GetDestination(StateDir)
+		target, err := Wormhole.GetDestination()
 		if err != nil {
 			log.Fatalf("No open wormhole: %v\n", err)
 		}
@@ -27,12 +27,12 @@ var sendCmd = &cobra.Command{
 		log.Println("sending", len(args), "file(s) to", target)
 
 		record := internal.TransferRecord{
-			Source:      args,
-			Copy:        copyMode,
-			StateDir:    StateDir,
+			Source:     args,
+			Copy:       copyMode,
+			WormholeID: Wormhole.ID,
 		}
 
-		if _, err := internal.Transfer(record); err != nil {
+		if _, err := Wormhole.Transfer(record); err != nil {
 			log.Fatalf("Error: %v", err)
 		}
 	},

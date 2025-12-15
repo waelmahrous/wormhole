@@ -39,6 +39,10 @@ var (
 	version = "dev"
 )
 
+var (
+	Wormhole internal.Wormhole
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wormhole",
@@ -46,7 +50,13 @@ var rootCmd = &cobra.Command{
 	Long:  `Easily transport files between shells.`,
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if err := internal.InitWormholeStore(StateDir); err != nil {
+		Wormhole = internal.Wormhole{
+			ID:          internal.DefaultID,
+			Destination: internal.DefaultDestination,
+			StateDir:    StateDir,
+		}
+
+		if err := Wormhole.InitWormholeStore(); err != nil {
 			log.Fatal(err)
 		}
 
@@ -57,7 +67,7 @@ var rootCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if status {
-			if dest, err := internal.GetDestination(StateDir); err != nil {
+			if dest, err := Wormhole.GetDestination(); err != nil {
 				log.Fatalf("Could not get destination: %v\n", err)
 			} else {
 				log.Printf("Wormhole open in: %s", dest)

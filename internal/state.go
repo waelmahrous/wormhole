@@ -19,13 +19,14 @@ const (
 type Wormhole struct {
 	ID          string `storm:"id"`
 	Destination string
+	StateDir    string
 }
 
 type TransferRecord struct {
-	ID          int `storm:"id,increment"`
+	ID          int    `storm:"id,increment"`
+	WormholeID  string `storm:"index"`
 	Source      []string
 	Copy        bool
-	StateDir    string
 	Destination string
 	WorkDir     string
 }
@@ -41,10 +42,10 @@ func withDB(path string, op Operation) error {
 	}
 }
 
-func SetDestination(path string, target string) (Wormhole, error) {
+func (w *Wormhole) SetDestination(target string) (Wormhole, error) {
 	var wormhole Wormhole
 
-	err := withDB(path, func(db *storm.DB) error {
+	err := withDB(w.StateDir, func(db *storm.DB) error {
 		if err := db.One("ID", DefaultID, &wormhole); err != nil {
 			return err
 		}
@@ -56,11 +57,11 @@ func SetDestination(path string, target string) (Wormhole, error) {
 	return wormhole, err
 }
 
-func GetDestination(path string) (string, error) {
+func (w *Wormhole) GetDestination() (string, error) {
 	var err error
 	var destination string
 
-	err = withDB(path, func(db *storm.DB) error {
+	err = withDB(w.StateDir, func(db *storm.DB) error {
 		var wormhole Wormhole
 
 		if err := db.One("ID", DefaultID, &wormhole); err != nil {
@@ -78,31 +79,26 @@ func GetDestination(path string) (string, error) {
 	return destination, err
 }
 
-func InitWormholeStore(path string) error {
-	if path == "" {
+func (w *Wormhole) InitWormholeStore() error {
+	if w.StateDir == "" {
 		return errors.New("empty state directory")
 	}
 
-	wormhole := Wormhole{
-		ID:          DefaultID,
-		Destination: DefaultDestination,
-	}
-
-	return withDB(path, func(db *storm.DB) error {
-		if err := db.One("ID", DefaultID, &wormhole); err != nil {
-			return db.Save(&wormhole)
+	return withDB(w.StateDir, func(db *storm.DB) error {
+		if err := db.One("ID", DefaultID, w); err != nil {
+			return db.Save(w)
 		}
 
 		return nil
 	})
 }
 
-func Transfer(record TransferRecord) ([]string, error) {
+func (w *Wormhole) Transfer(record TransferRecord) ([]string, error) {
 	if len(record.Source) == 0 {
 		return nil, errors.New("no files to send")
 	}
 
-	destination, err := GetDestination(record.StateDir)
+	destination, err := w.GetDestination()
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +129,7 @@ func Transfer(record TransferRecord) ([]string, error) {
 		}
 	}
 
-	return output, withDB(record.StateDir, func(db *storm.DB) error {
+	return output, withDB(w.StateDir, func(db *storm.DB) error {
 		record.Destination = destination
 		if wd, err := os.Getwd(); err != nil {
 			return fmt.Errorf("could not establish working directory, %v", err)

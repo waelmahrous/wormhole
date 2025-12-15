@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/waelmahrous/wormhole/internal"
 )
 
 var destination string
@@ -31,7 +30,7 @@ var openCmd = &cobra.Command{
 			}
 		}
 
-		if wormhole, err := internal.SetDestination(StateDir, target); err != nil {
+		if wormhole, err := Wormhole.SetDestination(target); err != nil {
 			log.Fatalf("Could not open wormhole in %q: %v\n", target, err)
 		} else {
 			log.Printf("Wormhole open at %s", wormhole.Destination)
