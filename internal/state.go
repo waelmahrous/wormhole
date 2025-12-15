@@ -12,7 +12,6 @@ import (
 
 const (
 	StoreName          = ".wormhole.db"
-	DefaultID          = "0"
 	DefaultDestination = ""
 )
 
@@ -50,7 +49,7 @@ func (w *Wormhole) SetDestination(target string) (Wormhole, error) {
 	var wormhole Wormhole
 
 	err := withDB(w.StateDir, func(db *storm.DB) error {
-		if err := db.One("ID", DefaultID, &wormhole); err != nil {
+		if err := db.One("ID", w.ID, &wormhole); err != nil {
 			return err
 		}
 
@@ -68,7 +67,7 @@ func (w *Wormhole) GetDestination() (string, error) {
 	err = withDB(w.StateDir, func(db *storm.DB) error {
 		var wormhole Wormhole
 
-		if err := db.One("ID", DefaultID, &wormhole); err != nil {
+		if err := db.One("ID", w.ID, &wormhole); err != nil {
 			return err
 		} else {
 			if wormhole.Destination == "" {
@@ -96,7 +95,7 @@ func (w *Wormhole) InitWormholeStore() error {
 	}
 
 	return withDB(w.StateDir, func(db *storm.DB) error {
-		if err := db.One("ID", DefaultID, w); err != nil {
+		if err := db.One("ID", w.ID, w); err != nil {
 			return db.Save(w)
 		}
 

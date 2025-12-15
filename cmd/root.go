@@ -34,6 +34,7 @@ var (
 	silent      bool
 	status      bool
 	showVersion bool
+	id          string
 	StateDir    string
 
 	version = "dev"
@@ -51,7 +52,7 @@ var rootCmd = &cobra.Command{
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		Wormhole = internal.Wormhole{
-			ID:          internal.DefaultID,
+			ID:          id,
 			Destination: internal.DefaultDestination,
 			StateDir:    StateDir,
 		}
@@ -104,6 +105,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")
 	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Get wormhole version")
 
+	rootCmd.PersistentFlags().StringVar(&id, "id", "Excelsior!", "Custom ID (many wormholes!)")
 	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Disable output")
 	rootCmd.PersistentFlags().StringVarP(
 		&StateDir,

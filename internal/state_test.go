@@ -10,6 +10,10 @@ import (
 	"github.com/waelmahrous/wormhole/internal"
 )
 
+var (
+	defaultId = "test"
+)
+
 func TestInitWormholeStore(t *testing.T) {
 	tempDir := t.TempDir()
 
@@ -33,7 +37,7 @@ func TestInitWormholeStore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := internal.Wormhole{
-				ID:          internal.DefaultID,
+				ID:          defaultId,
 				Destination: internal.DefaultDestination,
 				StateDir:    tt.path,
 			}
@@ -56,7 +60,7 @@ func TestInitWormholeStore(t *testing.T) {
 					t.Errorf("InitWormholeStore() failed: %v", err)
 				} else {
 					var ws internal.Wormhole
-					if err := db.One("ID", "0", &ws); err != nil {
+					if err := db.One("ID", defaultId, &ws); err != nil {
 						t.Fatalf("expected default wormhole, got error: %v", err)
 					}
 
@@ -103,7 +107,7 @@ func TestGetDestination(t *testing.T) {
 	}
 	for _, tt := range tests {
 		w := internal.Wormhole{
-			ID:          internal.DefaultID,
+			ID:          defaultId,
 			Destination: internal.DefaultDestination,
 			StateDir:    tt.path,
 		}
@@ -155,7 +159,7 @@ func TestSetDestination(t *testing.T) {
 	}
 	for _, tt := range tests {
 		w := internal.Wormhole{
-			ID:          internal.DefaultID,
+			ID:          defaultId,
 			Destination: internal.DefaultDestination,
 			StateDir:    tt.path,
 		}
@@ -224,7 +228,7 @@ func TestTransfer(t *testing.T) {
 	}
 
 	w := internal.Wormhole{
-		ID:          internal.DefaultID,
+		ID:          defaultId,
 		Destination: internal.DefaultDestination,
 		StateDir:    from,
 	}
@@ -240,8 +244,8 @@ func TestTransfer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			record := internal.TransferRecord{
-				Source:   tt.src,
-				Copy:     false,
+				Source: tt.src,
+				Copy:   false,
 			}
 			got, gotErr := w.Transfer(record)
 			if gotErr != nil {
