@@ -70,16 +70,19 @@ var rootCmd = &cobra.Command{
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if status {
+		switch {
+		case status:
 			if dest, err := Wormhole.GetDestination(); err != nil {
 				log.Fatalf("Could not get destination: %v\n", err)
 			} else {
 				log.Printf("Wormhole open in: %s", dest)
 			}
-		}
 
-		if showVersion {
+		case showVersion:
 			log.Printf("wormhole version: %s", version)
+
+		default:
+			cmd.Help()
 		}
 	},
 }
