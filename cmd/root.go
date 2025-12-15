@@ -75,11 +75,12 @@ var rootCmd = &cobra.Command{
 				log.Fatalf("Could not get destination: %v\n", err)
 			} else {
 				log.Printf("Wormhole open in: %s", dest)
-				return
 			}
 		}
 
-		log.Printf("wormhole version: %s", version)
+		if showVersion {
+			log.Printf("wormhole version: %s", version)
+		}
 	},
 }
 
