@@ -35,11 +35,12 @@ var sendCmd = &cobra.Command{
 		}
 
 		if SafeMode {
-			os.Mkdir(filepath.Join(Wormhole.StateDir, internal.DefaultSafeZone), 0755)
+			safeZonePath := filepath.Join(Wormhole.StateDir, internal.DefaultSafeZone)
+			os.Mkdir(safeZonePath, 0755)
 
 			safeZone := internal.Wormhole{
 				ID:          "safezone",
-				Destination: filepath.Join(Wormhole.StateDir, internal.DefaultSafeZone),
+				Destination: safeZonePath,
 				StateDir:    StateDir,
 			}
 
@@ -51,7 +52,9 @@ var sendCmd = &cobra.Command{
 			backupRecord.Copy = true
 			backupRecord.WormholeID = safeZone.ID
 
-			safeZone.Transfer(backupRecord)
+			if _, err := safeZone.Transfer(backupRecord); err != nil {
+				log.Fatalf("Could not copy files to safezone, %v", err)
+			}
 
 			log.Printf("copied %d file(s) to safezone in %s", len(args), safeZone.Destination)
 		}
