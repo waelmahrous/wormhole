@@ -63,6 +63,10 @@ var rootCmd = &cobra.Command{
 		if silent {
 			log.SetOutput(io.Discard)
 		}
+
+		Wormhole.SetArgs(internal.WormholeArgs{
+			// TODO: Add args
+		})
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -75,12 +79,7 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		if showVersion {
-			log.Printf("wormhole version: %s", version)
-			return
-		}
-
-		_ = cmd.Help()
+		log.Printf("wormhole version: %s", version)
 	},
 }
 

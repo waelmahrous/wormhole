@@ -20,6 +20,10 @@ type Wormhole struct {
 	ID          string `storm:"id"`
 	Destination string
 	StateDir    string
+	Args        WormholeArgs
+}
+
+type WormholeArgs struct {
 }
 
 type TransferRecord struct {
@@ -77,6 +81,13 @@ func (w *Wormhole) GetDestination() (string, error) {
 	})
 
 	return destination, err
+}
+
+func (w *Wormhole) SetArgs(a WormholeArgs) error {
+	return withDB(w.StateDir, func(db *storm.DB) error {
+		w.Args = a
+		return db.Save(w)
+	})
 }
 
 func (w *Wormhole) InitWormholeStore() error {
