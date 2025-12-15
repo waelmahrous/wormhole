@@ -5,6 +5,8 @@ package cmd
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/waelmahrous/wormhole/internal"
@@ -30,6 +32,28 @@ var sendCmd = &cobra.Command{
 			Source:     args,
 			Copy:       copyMode,
 			WormholeID: Wormhole.ID,
+		}
+
+		if SafeMode {
+			os.Mkdir(filepath.Join(Wormhole.StateDir, internal.DefaultSafeZone), 0755)
+
+			safeZone := internal.Wormhole{
+				ID:          "safezone",
+				Destination: filepath.Join(Wormhole.StateDir, internal.DefaultSafeZone),
+				StateDir:    StateDir,
+			}
+
+			if err := safeZone.InitWormholeStore(); err != nil {
+				log.Fatal(err)
+			}
+
+			backupRecord := record
+			backupRecord.Copy = true
+			backupRecord.WormholeID = safeZone.ID
+
+			safeZone.Transfer(backupRecord)
+
+			log.Printf("copied %d file(s) to safezone in %s", len(args), safeZone.Destination)
 		}
 
 		if _, err := Wormhole.Transfer(record); err != nil {

@@ -13,6 +13,7 @@ import (
 const (
 	StoreName          = ".wormhole.db"
 	DefaultDestination = ""
+	DefaultSafeZone    = ".wormhole"
 )
 
 type Wormhole struct {
