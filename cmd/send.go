@@ -12,7 +12,10 @@ import (
 	"github.com/waelmahrous/wormhole/internal"
 )
 
-var copyMode bool
+var (
+	copyMode bool
+	force    bool
+)
 
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
@@ -32,6 +35,7 @@ var sendCmd = &cobra.Command{
 			Source:     args,
 			Copy:       copyMode,
 			WormholeID: Wormhole.ID,
+			Force:      force,
 		}
 
 		if SafeMode {
@@ -69,4 +73,5 @@ func init() {
 	rootCmd.AddCommand(sendCmd)
 
 	sendCmd.Flags().BoolVarP(&copyMode, "copy", "c", false, "Copy mode (do not move files)")
+	sendCmd.Flags().BoolVarP(&force, "force", "f", false, "Force send, if file already exists")
 }

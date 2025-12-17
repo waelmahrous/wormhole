@@ -33,6 +33,7 @@ type TransferRecord struct {
 	Copy        bool
 	Destination string
 	WorkDir     string
+	Force       bool
 }
 
 type Operation func(*storm.DB) error
@@ -123,7 +124,7 @@ func (w *Wormhole) Transfer(record TransferRecord) ([]string, error) {
 
 		filePath := filepath.Join(destination, filepath.Base(src))
 
-		if _, err := os.Stat(filePath); err == nil {
+		if _, err := os.Stat(filePath); err == nil && record.Force == false {
 			return output, errors.New("file already exists in target directory")
 		}
 
