@@ -38,8 +38,8 @@ type TransferRecord struct {
 
 type Operation func(*storm.DB) error
 
-func withDB(path string, op Operation) error {
-	if db, err := storm.Open(filepath.Join(path, StoreName)); err != nil {
+func (w *Wormhole) withDB(op Operation) error {
+	if db, err := storm.Open(filepath.Join(w.StateDir, StoreName)); err != nil {
 		return err
 	} else {
 		defer db.Close()
@@ -50,7 +50,7 @@ func withDB(path string, op Operation) error {
 func (w *Wormhole) SetDestination(target string) (Wormhole, error) {
 	var wormhole Wormhole
 
-	err := withDB(w.StateDir, func(db *storm.DB) error {
+	err := w.withDB(func(db *storm.DB) error {
 		if err := db.One("ID", w.ID, &wormhole); err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ func (w *Wormhole) GetDestination() (string, error) {
 	var err error
 	var destination string
 
-	err = withDB(w.StateDir, func(db *storm.DB) error {
+	err = w.withDB(func(db *storm.DB) error {
 		var wormhole Wormhole
 
 		if err := db.One("ID", w.ID, &wormhole); err != nil {
@@ -85,7 +85,7 @@ func (w *Wormhole) GetDestination() (string, error) {
 }
 
 func (w *Wormhole) SetArgs(a WormholeArgs) error {
-	return withDB(w.StateDir, func(db *storm.DB) error {
+	return w.withDB(func(db *storm.DB) error {
 		w.Args = a
 		return db.Save(w)
 	})
@@ -96,7 +96,7 @@ func (w *Wormhole) InitWormholeStore() error {
 		return errors.New("empty state directory")
 	}
 
-	return withDB(w.StateDir, func(db *storm.DB) error {
+	return w.withDB(func(db *storm.DB) error {
 		if err := db.One("ID", w.ID, w); err != nil {
 			return db.Save(w)
 		}
@@ -141,7 +141,7 @@ func (w *Wormhole) Transfer(record TransferRecord) ([]string, error) {
 		}
 	}
 
-	return output, withDB(w.StateDir, func(db *storm.DB) error {
+	return output, w.withDB(func(db *storm.DB) error {
 		record.Destination = destination
 		if wd, err := os.Getwd(); err != nil {
 			return fmt.Errorf("could not establish working directory, %v", err)
