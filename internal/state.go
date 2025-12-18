@@ -43,45 +43,33 @@ func (w *Wormhole) withDB(op Operation) error {
 		return err
 	} else {
 		defer db.Close()
+
+		if err := db.One("ID", w.ID, w); err != nil {
+			return err
+		}
+
 		return op(db)
 	}
 }
 
-func (w *Wormhole) SetDestination(target string) (Wormhole, error) {
-	var wormhole Wormhole
-
-	err := w.withDB(func(db *storm.DB) error {
-		if err := db.One("ID", w.ID, &wormhole); err != nil {
-			return err
-		}
-
-		wormhole.Destination = target
-		return db.Save(&wormhole)
+func (w *Wormhole) SetDestination(target string) error {
+	return w.withDB(func(db *storm.DB) error {
+		w.Destination = target
+		return db.Save(w)
 	})
-
-	return wormhole, err
 }
 
 func (w *Wormhole) GetDestination() (string, error) {
-	var err error
 	var destination string
 
-	err = w.withDB(func(db *storm.DB) error {
-		var wormhole Wormhole
-
-		if err := db.One("ID", w.ID, &wormhole); err != nil {
-			return err
-		} else {
-			if wormhole.Destination == "" {
-				return errors.New("no wormhole open")
-			}
-
-			destination = wormhole.Destination
-			return nil
+	return destination, w.withDB(func(db *storm.DB) error {
+		if w.Destination == "" {
+			return errors.New("no wormhole open")
 		}
-	})
 
-	return destination, err
+		destination = w.Destination
+		return nil
+	})
 }
 
 func (w *Wormhole) SetArgs(a WormholeArgs) error {
@@ -96,13 +84,17 @@ func (w *Wormhole) InitWormholeStore() error {
 		return errors.New("empty state directory")
 	}
 
-	return w.withDB(func(db *storm.DB) error {
+	if db, err := storm.Open(filepath.Join(w.StateDir, StoreName)); err != nil {
+		return err
+	} else {
+		defer db.Close()
+
 		if err := db.One("ID", w.ID, w); err != nil {
 			return db.Save(w)
 		}
 
 		return nil
-	})
+	}
 }
 
 func (w *Wormhole) Transfer(record TransferRecord) ([]string, error) {

@@ -30,10 +30,10 @@ var openCmd = &cobra.Command{
 			}
 		}
 
-		if wormhole, err := Wormhole.SetDestination(target); err != nil {
+		if err := Wormhole.SetDestination(target); err != nil {
 			log.Fatalf("Could not open wormhole in %q: %v\n", target, err)
 		} else {
-			log.Printf("Wormhole open at %s", wormhole.Destination)
+			log.Printf("Wormhole open at %s", Wormhole.Destination)
 		}
 	},
 }

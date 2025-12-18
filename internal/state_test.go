@@ -115,7 +115,7 @@ func TestGetDestination(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if _, err := w.SetDestination(tt.want); err != nil {
+		if err := w.SetDestination(tt.want); err != nil {
 			t.Fatal(err)
 		}
 
@@ -169,7 +169,7 @@ func TestSetDestination(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := w.SetDestination(tt.target)
+			gotErr := w.SetDestination(tt.target)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("SetDestination() failed: %v", gotErr)
@@ -180,8 +180,8 @@ func TestSetDestination(t *testing.T) {
 				t.Fatal("SetDestination() succeeded unexpectedly")
 			}
 
-			if tt.want.Destination != got.Destination {
-				t.Errorf("SetDestination() = %v, want %v", got, tt.want)
+			if tt.want.Destination != w.Destination {
+				t.Errorf("SetDestination() = %v, want %v", w, tt.want)
 			}
 		})
 	}
@@ -237,7 +237,7 @@ func TestTransfer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := w.SetDestination(to); err != nil {
+	if err := w.SetDestination(to); err != nil {
 		t.Errorf("Transfer() failed: %v", err)
 	}
 
