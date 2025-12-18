@@ -1,3 +1,26 @@
+## v0.8.0 (2025-12-18)
+
+### Feat
+
+- **send**: add force mode
+- add a safezone
+- **root**: set configurable wormhole id
+- **args**: add args struct for wormhole
+- **tmux**: add keybinding to open new window at wormhole
+- **send**: use GetDestination and store transfer records in database
+
+### Fix
+
+- **root**: dont return on status
+
+### Refactor
+
+- cleanup db interaction
+- add withDB to wormhole methods
+- **safezone**: small cleanup
+- **root**: use switch case for flags
+- convert static state functions to wormhole methods
+
 ## v0.7.2 (2025-12-12)
 
 ### Fix
