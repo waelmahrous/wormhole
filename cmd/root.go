@@ -66,6 +66,8 @@ var rootCmd = &cobra.Command{
 			log.SetOutput(io.Discard)
 		}
 
+		log.SetFlags(0)
+
 		Wormhole.SetArgs(internal.WormholeArgs{
 			// TODO: Add args
 		})
