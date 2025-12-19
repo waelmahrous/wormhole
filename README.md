@@ -1,12 +1,9 @@
-# wormhole
+![wormhole](./.github/media/send.gif)
 
-### Teleport files between terminals without thinking about paths.
+### Teleport files without thinking about paths.
 
-**wormhole** is a tiny shell utility that lets you “open” a destination in one terminal, then instantly send or copy to it from anywhere else. No more typing long paths, no more hunting for the right directory. If you already have a terminal open where you want things to go, that location becomes your wormhole.
-
-Might turn this into a tmux plugin.
-
----
+**wormhole** is a tiny shell tool that lets you mark a directory as a destination and then send or copy files to it from anywhere.
+It removes the need to remember or retype long paths and integrates smoothly with tmux for fast, terminal-based workflows.
 
 - [Features](#features)
 - [Installation](#installation)
@@ -19,11 +16,13 @@ Might turn this into a tmux plugin.
 
 ## Features
 
-- **Open a wormhole** in the current directory
-- **Send** files or directories into the wormhole
-- **Copy** files without deleting the originals
-- **Check status** 
-- **tmux integration**
+- **Open a wormhole** in any directory and reuse it across shells
+- **Send files** to the active wormhole from anywhere
+- **Copy mode** to keep originals intact
+- **Force mode** to overwrite existing files when needed
+- **Safezone support** for safer transfers
+- **Configurable ID** for opening multiple wormholes
+- **tmux integration** for opening wormholes
 
 ## Installation
 
