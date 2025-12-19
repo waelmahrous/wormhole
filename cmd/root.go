@@ -77,9 +77,9 @@ var rootCmd = &cobra.Command{
 		switch {
 		case status:
 			if dest, err := Wormhole.GetDestination(); err != nil {
-				log.Fatalf("Could not get destination: %v\n", err)
+				log.Fatalf("could not get destination: %v\n", err)
 			} else {
-				log.Printf("Wormhole open in: %s", dest)
+				log.Printf("wormhole open in: %s", dest)
 			}
 
 		case showVersion:
@@ -102,7 +102,7 @@ func Execute() {
 func init() {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatalf("Could not establish user home directory")
+		log.Fatalf("could not establish user home directory: %v", err)
 	}
 
 	rootCmd.Flags().BoolVarP(&status, "status", "t", false, "Show open wormhole")

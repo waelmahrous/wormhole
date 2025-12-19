@@ -26,7 +26,7 @@ var sendCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		target, err := Wormhole.GetDestination()
 		if err != nil {
-			log.Fatalf("No open wormhole: %v\n", err)
+			log.Fatalf("no open wormhole: %v\n", err)
 		}
 
 		log.Println("sending", len(args), "file(s) to", target)
@@ -57,14 +57,14 @@ var sendCmd = &cobra.Command{
 			backupRecord.WormholeID = safeZone.ID
 
 			if _, err := safeZone.Transfer(backupRecord); err != nil {
-				log.Fatalf("Could not copy files to safezone, %v", err)
+				log.Fatalf("could not copy files to safezone, %v", err)
 			}
 
 			log.Printf("copied %d file(s) to safezone in %s", len(args), safeZone.Destination)
 		}
 
 		if _, err := Wormhole.Transfer(record); err != nil {
-			log.Fatalf("Error: %v", err)
+			log.Fatal(err)
 		}
 	},
 }

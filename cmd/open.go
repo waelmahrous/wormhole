@@ -26,14 +26,14 @@ var openCmd = &cobra.Command{
 			target = destination
 		} else {
 			if target, err = os.Getwd(); err != nil {
-				log.Fatalf("Could not resolve working directory %v\n", err)
+				log.Fatalf("could not resolve working directory %v\n", err)
 			}
 		}
 
 		if err := Wormhole.SetDestination(target); err != nil {
-			log.Fatalf("Could not open wormhole in %q: %v\n", target, err)
+			log.Fatalf("could not open wormhole in %q: %v\n", target, err)
 		} else {
-			log.Printf("Wormhole open at %s", Wormhole.Destination)
+			log.Printf("wormhole open at %s", Wormhole.Destination)
 		}
 	},
 }
